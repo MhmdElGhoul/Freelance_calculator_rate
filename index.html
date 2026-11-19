@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Freelance Hourly Rate Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+--bg:#EEF2F6; --surface:#FFFFFF; --ink:#0F1B2D; --muted:#566377; --line:#D3DBE5;
+--accent:#0E7C66; --accent-ink:#FFFFFF; --tax:#E0A526; --exp:#7B8AA0; --focus:#1F4BFF;
+--display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+--body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+box-sizing:border-box;
+padding-top:env(safe-area-inset-top,0px);
+padding-bottom:env(safe-area-inset-bottom,0px);
+color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+:root:not([data-theme="light"]){
+--bg:#0C141F; --surface:#142030; --ink:#E8EEF6; --muted:#9AA8BC; --line:#26364B;
+--accent:#3DD6B0; --accent-ink:#06261E; --tax:#E8B23A; --exp:#7F90A8; --focus:#7C9BFF;
+color-scheme:dark;
+}
+}
+:root[data-theme="dark"]{
+--bg:#0C141F; --surface:#142030; --ink:#E8EEF6; --muted:#9AA8BC; --line:#26364B;
+--accent:#3DD6B0; --accent-ink:#06261E; --tax:#E8B23A; --exp:#7F90A8; --focus:#7C9BFF;
+color-scheme:dark;
+}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:1.0625rem;line-height:1.55;-webkit-text-size-adjust:100%}
+.wrap{max-width:62rem;margin:0 auto;padding:0 1.25rem}
+header{padding:3rem 0 2rem}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(2rem,6vw,3.5rem);line-height:1.05;letter-spacing:-.02em;margin:0 0 .75rem;max-width:18ch}
+.lede{color:var(--muted);max-width:56ch;margin:0}
+.calc{display:grid;gap:1.25rem;grid-template-columns:1fr;align-items:start}
+@media (min-width:52rem){.calc{grid-template-columns:1.05fr 1fr}.result{position:sticky;top:1rem}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:1rem;padding:1.5rem}
+.panel h2{font-family:var(--display);font-size:1.25rem;margin:0 0 1.25rem}
+.field{margin-bottom:1.1rem}
+label{display:block;font-weight:600;font-size:.95rem;margin-bottom:.3rem}
+.hint{display:block;color:var(--muted);font-size:.85rem;font-weight:400}
+.control{display:flex;align-items:center;border:1.5px solid var(--line);border-radius:.6rem;background:var(--bg);overflow:hidden}
+.control:focus-within{border-color:var(--focus);outline:2px solid var(--focus);outline-offset:1px}
+.control span{padding:0 .8rem;color:var(--muted);font-weight:600;white-space:nowrap}
+.control input,.control select{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font:inherit;font-size:1.05rem;padding:.7rem .8rem;outline:none}
+.control input{text-align:right}
+.control select{text-align:left}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
+@media (max-width:30rem){.row{grid-template-columns:1fr}}
+.big{font-family:var(--display);font-weight:700;font-size:clamp(3rem,12vw,4.75rem);line-height:1;letter-spacing:-.03em;color:var(--accent)}
+.big small{font-size:.35em;color:var(--muted);font-weight:500;letter-spacing:0;margin-left:.2em}
+.result .tag{color:var(--muted);margin:0 0 .4rem}
+.note{color:var(--muted);font-size:.9rem;margin:.6rem 0 0}
+.bar{display:flex;height:.9rem;border-radius:99px;overflow:hidden;margin:1.5rem 0 .75rem;background:var(--line)}
+.bar i{display:block;height:100%;transition:width .35s ease}
+.legend{list-style:none;margin:0;padding:0;display:grid;gap:.35rem;font-size:.93rem}
+.legend li{display:flex;align-items:center;gap:.55rem}
+.legend b{margin-left:auto;font-variant-numeric:tabular-nums}
+.dot{width:.75rem;height:.75rem;border-radius:50%;flex:none}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid var(--line)}
+.stats div span{display:block;color:var(--muted);font-size:.85rem}
+.stats div strong{font-family:var(--display);font-size:1.35rem;font-variant-numeric:tabular-nums}
+.err{color:#C0392B;font-weight:600;margin:0}
+:root[data-theme="dark"] .err{color:#FF8A7A}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .err{color:#FF8A7A}}
+section.faq{padding:3.5rem 0 2rem}
+.faq h2{font-family:var(--display);font-size:clamp(1.6rem,4vw,2.2rem);letter-spacing:-.01em;margin:0 0 1.25rem}
+details{border-bottom:1px solid var(--line);max-width:46rem}
+summary{cursor:pointer;list-style:none;padding:1rem 2rem 1rem 0;font-weight:600;position:relative}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";position:absolute;right:.25rem;top:.85rem;font-size:1.4rem;font-weight:400;color:var(--accent);transition:transform .2s}
+details[open] summary::after{transform:rotate(45deg)}
+summary:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:.3rem}
+details p{margin:0 0 1rem;color:var(--muted);max-width:62ch}
+footer{padding:1rem 0 3rem;color:var(--muted);font-size:.88rem}
+footer a{color:var(--muted)}
+.nav{display:flex;flex-wrap:wrap;gap:.4rem 1.5rem;padding:1.1rem 0 0;font-weight:600;font-size:.95rem}
+.nav a,.page a{color:var(--ink);text-decoration:none;border-bottom:2px solid transparent}
+.nav a:hover,.nav a.active{border-bottom-color:var(--accent)}
+.page a{color:var(--accent);border-bottom-color:currentColor}
+a:focus-visible,button:focus-visible{outline:2px solid var(--focus);outline-offset:3px;border-radius:.2rem}
+.guide{padding:3.5rem 0 0}
+.guide h2,.page h2{font-family:var(--display);letter-spacing:-.01em}
+.guide h2{font-size:clamp(1.6rem,4vw,2.2rem);margin:0 0 1rem}
+.guide p,.guide li{max-width:62ch}
+.guide ol{padding-left:1.3rem;margin:1rem 0}
+.guide li{margin-bottom:.8rem;padding-left:.3rem}
+.guide li strong{display:block}
+.page{padding:2.5rem 0 2rem;max-width:46rem}
+.page h1{font-size:clamp(1.9rem,5vw,2.8rem);max-width:none}
+.page h2{font-size:1.3rem;margin:2rem 0 .5rem}
+.page p,.page li{max-width:66ch}
+.page .updated{color:var(--muted);font-size:.9rem}
+.control textarea{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font:inherit;padding:.7rem .8rem;outline:none;resize:vertical;min-height:8rem}
+.control input.left{text-align:left}
+.btn{font:inherit;font-weight:600;background:var(--accent);color:var(--accent-ink);border:0;border-radius:.6rem;padding:.75rem 1.4rem;cursor:pointer}
+.btn:hover{filter:brightness(1.08)}
+@media (prefers-reduced-motion:reduce){.bar i,summary::after{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="nav" aria-label="Main">
+<a href="#home" data-nav="home">Calculator</a>
+<a href="#privacy" data-nav="privacy">Privacy policy</a>
+<a href="#contact" data-nav="contact">Contact</a>
+</nav>
+<div id="view-home">
+<header>
+<h1>What should you charge per hour?</h1>
+<p class="lede">Enter the income you want, your business costs, and the hours you can really bill. You’ll get the lowest hourly rate that covers it all.</p>
+</header>
+
+<main>
+<div class="calc">
+<div class="panel" id="inputs">
+<h2>Your numbers</h2>
+<div class="field">
+<label for="cur">Currency</label>
+<div class="control"><select id="cur" aria-label="Currency">
+<option value="USD">US dollar ($)</option>
+<option value="EUR">Euro (€)</option>
+<option value="GBP">British pound (£)</option>
+<option value="CAD">Canadian dollar (C$)</option>
+<option value="AUD">Australian dollar (A$)</option>
+</select></div>
+</div>
+<div class="field">
+<label for="income">Desired annual take-home income <span class="hint">What you want to keep after taxes and expenses.</span></label>
+<div class="control"><span class="sym">$</span><input id="income" type="number" inputmode="decimal" min="0" step="1000" value="70000"></div>
+</div>
+<div class="field">
+<label for="expenses">Annual business expenses <span class="hint">Software, equipment, insurance, coworking, accounting, marketing.</span></label>
+<div class="control"><span class="sym">$</span><input id="expenses" type="number" inputmode="decimal" min="0" step="500" value="9000"></div>
+</div>
+<div class="row">
+<div class="field">
+<label for="hours">Billable hours per week <span class="hint">Hours you invoice, not hours you work.</span></label>
+<div class="control"><input id="hours" type="number" inputmode="decimal" min="1" max="80" step="1" value="25"><span>hrs</span></div>
+</div>
+<div class="field">
+<label for="weeks">Weeks off per year <span class="hint">Holidays, sick days, vacation.</span></label>
+<div class="control"><input id="weeks" type="number" inputmode="decimal" min="0" max="51" step="1" value="6"><span>weeks</span></div>
+</div>
+</div>
+<div class="field" style="margin-bottom:0">
+<label for="tax">Estimated tax rate <span class="hint">Income tax plus self-employment taxes. Use 0 to skip.</span></label>
+<div class="control"><input id="tax" type="number" inputmode="decimal" min="0" max="60" step="1" value="25"><span>%</span></div>
+</div>
+</div>
+
+<div class="panel result" id="result" aria-live="polite">
+<h2>Your minimum rate</h2>
+<div id="out">
+<p class="tag">Charge at least</p>
+<div class="big" id="rate">–</div>
+<p class="note" id="buffer"></p>
+<div class="bar" id="bar" role="img" aria-label="Breakdown of revenue"></div>
+<ul class="legend" id="legend"></ul>
+<div class="stats">
+<div><span>Day rate (8 hrs)</span><strong id="day">–</strong></div>
+<div><span>Monthly revenue target</span><strong id="month">–</strong></div>
+<div><span>Billable hours per year</span><strong id="yh">–</strong></div>
+<div><span>Revenue needed per year</span><strong id="rev">–</strong></div>
+</div>
+</div>
+<p class="err" id="err" hidden></p>
+</div>
+</div>
+</main>
+
+<section class="guide" id="guide">
+<h2>How to use this tool</h2>
+<p>This calculator finds the lowest hourly rate that still pays you what you want after taxes and business costs. It takes about two minutes.</p>
+<ol>
+<li><strong>Start with your take-home goal.</strong> Enter the yearly amount you want to keep after expenses and taxes. Think of it as the salary you’d pay yourself to cover rent, savings, and everyday life.</li>
+<li><strong>Add your business expenses.</strong> Total what you pay each year to run your work: software, equipment, insurance, a workspace, accounting, and marketing. Last year’s bank statements make this easy.</li>
+<li><strong>Be realistic about hours.</strong> Enter billable hours per week, meaning time you can invoice. Meetings, emails, proposals, and admin usually don’t count, so most freelancers land between 20 and 30. Then enter the weeks you’ll take off for holidays, sick days, and vacation.</li>
+<li><strong>Estimate your tax rate.</strong> Enter a percentage covering income tax and self-employment contributions. If you’re unsure, ask an accountant or check your tax authority’s guidance.</li>
+<li><strong>Read your results.</strong> The large figure is your minimum hourly rate. The cushion rate adds 20% to protect you from slow months and late payments. The day rate, monthly target, and colored bar show where each dollar of revenue goes.</li>
+<li><strong>Test different scenarios.</strong> Change one number at a time. Five more billable hours a week, one cancelled subscription, or one fewer week off can each move your rate noticeably. Results update instantly, so you can compare options before you quote a client.</li>
+</ol>
+<p>Your entries stay in your browser. Nothing is saved or sent anywhere.</p>
+</section>
+
+<section class="faq" id="faq">
+<h2>Frequently asked questions</h2>
+<details open>
+<summary>How is the rate calculated?</summary>
+<p>Expenses come off the top, and taxes apply to what’s left as your income. So revenue needed = expenses + take-home income ÷ (1 − tax rate). Divide that by your billable hours for the year (hours per week × weeks worked) to get the hourly rate.</p>
+</details>
+<details>
+<summary>Why not just divide my salary by 2,080 hours?</summary>
+<p>2,080 is a full-time employee’s paid hours. Freelancers spend a lot of time on sales, admin, and learning that nobody pays for, and they cover their own taxes, insurance, and time off. Most freelancers bill 20 to 30 hours a week, so the same income needs a much higher hourly rate.</p>
+</details>
+<details>
+<summary>How many billable hours should I enter?</summary>
+<p>Be conservative. A common range is 20 to 30 hours a week, even when you work 40 or more. If you’re new, or you spend a lot of time finding clients, start near 20. You can raise it later and see the rate drop.</p>
+</details>
+<details>
+<summary>Which expenses should I include?</summary>
+<p>Anything you pay to run the business: software subscriptions, hardware, a workspace, professional insurance, accounting, contractor help, marketing, training, and payment-processing fees. Add a small cushion for surprises, such as a laptop failing.</p>
+</details>
+<details>
+<summary>What tax rate should I use?</summary>
+<p>It depends on your country, income level, and local rules. Many freelancers land between 20% and 35% once self-employment taxes are included. Ask an accountant for a figure that fits your situation, and treat this tool as a planning aid, not tax advice.</p>
+</details>
+<details>
+<summary>Is this the rate I should quote clients?</summary>
+<p>Treat it as your floor. Clients also pay for your experience, speed, and the value of the result, so many freelancers quote 10% to 30% above their minimum. Unpaid gaps between projects, late invoices, and scope creep all eat into the margin, and the extra covers them.</p>
+</details>
+<details>
+<summary>Should I charge hourly or per project?</summary>
+<p>Hourly works well for open-ended or ongoing work. For defined deliverables, a project price is often better: estimate your hours, multiply by your rate, and add a buffer. This way you’re rewarded for working efficiently rather than penalized.</p>
+</details>
+</section>
+
+</div>
+
+<div id="view-privacy" class="page" hidden>
+<h1>Privacy policy</h1>
+<p class="updated">Last updated: November 18, 2026</p>
+<p>This policy explains what happens to your information when you use the Freelance Hourly Rate Calculator. The short version: the calculator runs in your browser, and we don’t collect the numbers you type in.</p>
+<h2>What the calculator does with your entries</h2>
+<p>Your income, expenses, hours, and tax figures are processed on your own device to produce the result. They are not uploaded, stored on a server, or shared with anyone. When you close or refresh the page, they are gone.</p>
+<h2>Information collected automatically</h2>
+<p>Like most websites, the server that hosts this page may record standard technical data such as your IP address, browser type, device type, and the time of your visit. This is used to keep the site running and secure.</p>
+<h2>Third-party services</h2>
+<p>This page loads fonts from Google Fonts, which means your browser contacts Google’s servers and your IP address is visible to them. Google describes how it handles that data in its own privacy policy.</p>
+<h2>Advertising and cookies</h2>
+<p>This site may show ads from third-party networks such as Google AdSense. These providers may use cookies or similar technologies to show ads based on your visits to this and other websites. You can opt out of personalized advertising through Google’s Ads Settings at adssettings.google.com or at aboutads.info, and you can block or delete cookies in your browser settings.</p>
+<h2>Your rights</h2>
+<p>Depending on where you live, you may have rights to access, correct, or delete personal data we hold about you, or to object to certain processing. Because we don’t collect personal data through the calculator, there is usually nothing to retrieve, but you can <a href="#contact">contact us</a> with any request.</p>
+<h2>Children</h2>
+<p>This site is intended for adults and isn’t directed at children under 13.</p>
+<h2>Changes to this policy</h2>
+<p>If we change how the site works, we will update this page and the date above.</p>
+<h2>Questions</h2>
+<p>Reach us through the <a href="#contact">contact page</a>.</p>
+</div>
+
+<div id="view-contact" class="page" hidden>
+<h1>Contact</h1>
+<p>Questions, feedback, or a bug to report? Email us at <a id="mail" href="mailto:Mhmdelghoul6@gmail.com">Mhmdelghoul6@gmail.com</a> and we’ll reply as soon as we can.</p>
+<p>You can also write your message below. The button opens your email app with the message filled in.</p>
+<div class="panel" style="margin-top:1.25rem">
+<div class="field">
+<label for="cname">Your name</label>
+<div class="control"><input class="left" id="cname" type="text" autocomplete="name"></div>
+</div>
+<div class="field">
+<label for="cmsg">Message</label>
+<div class="control"><textarea id="cmsg"></textarea></div>
+</div>
+<p class="err" id="cerr" hidden>Write a message before sending.</p>
+<button class="btn" id="send" type="button">Open email</button>
+</div>
+</div>
+
+<footer>Estimates only. Nothing here is financial or tax advice, and your numbers are never sent anywhere. <a href="#privacy">Privacy policy</a> · <a href="#contact">Contact</a></footer>
+</div>
+
+<script>
+(function(){
+var $=function(id){return document.getElementById(id)};
+var fmt;
+function setCur(){
+var c=$("cur").value;
+fmt=new Intl.NumberFormat(undefined,{style:"currency",currency:c,maximumFractionDigits:0});
+var sym=fmt.format(0).replace(/[0-9.,\s]/g,"");
+var syms=document.querySelectorAll(".sym");
+for(var i=0;i<syms.length;i++)syms[i].textContent=sym;
+}
+function num(id){var v=parseFloat($(id).value);return isNaN(v)?0:v}
+function calc(){
+var income=num("income"),exp=num("expenses"),hrs=num("hours"),off=num("weeks"),tax=num("tax");
+var weeks=52-off, yh=hrs*weeks;
+var err=$("err"),out=$("out");
+if(hrs<=0||weeks<=0||tax>=100||income<0||exp<0){
+err.hidden=false;out.hidden=true;
+err.textContent=weeks<=0?"Weeks off must be less than 52.":hrs<=0?"Enter at least 1 billable hour per week.":"Check your entries: values can’t be negative and tax must be under 100%.";
+return;
+}
+err.hidden=true;out.hidden=false;
+var gross=income/(1-tax/100);
+var rev=exp+gross;
+var taxAmt=gross-income;
+var rate=rev/yh;
+var r1=function(n){return fmt.format(Math.ceil(n))};
+$("rate").innerHTML=r1(rate)+"<small>/ hour</small>";
+$("buffer").textContent="With a 20% cushion for slow months: "+r1(rate*1.2)+" per hour.";
+$("day").textContent=r1(rate*8);
+$("month").textContent=r1(rev/12);
+$("yh").textContent=Math.round(yh).toLocaleString();
+$("rev").textContent=r1(rev);
+var parts=[
+{n:"Your take-home",v:income,c:"var(--accent)"},
+{n:"Taxes",v:taxAmt,c:"var(--tax)"},
+{n:"Business expenses",v:exp,c:"var(--exp)"}
+];
+var bar="",leg="";
+parts.forEach(function(p){
+var pct=rev>0?p.v/rev*100:0;
+bar+='<i style="width:'+pct.toFixed(2)+'%;background:'+p.c+'"></i>';
+leg+='<li><span class="dot" style="background:'+p.c+'"></span>'+p.n+'<b>'+fmt.format(Math.round(p.v))+' ('+Math.round(pct)+'%)</b></li>';
+});
+$("bar").innerHTML=bar;
+$("bar").setAttribute("aria-label","Share of revenue: "+parts.map(function(p){return p.n+" "+Math.round(rev>0?p.v/rev*100:0)+"%"}).join(", "));
+$("legend").innerHTML=leg;
+}
+["income","expenses","hours","weeks","tax"].forEach(function(id){$(id).addEventListener("input",calc)});
+$("cur").addEventListener("change",function(){setCur();calc()});
+setCur();calc();
+
+var EMAIL="Mhmdelghoul6@gmail.com";
+$("mail").textContent=EMAIL;$("mail").href="mailto:"+EMAIL;
+$("send").addEventListener("click",function(){
+var n=$("cname").value.trim(),m=$("cmsg").value.trim();
+if(!m){$("cerr").hidden=false;return}
+$("cerr").hidden=true;
+location.href="mailto:"+EMAIL+"?subject="+encodeURIComponent("Message from "+(n||"a visitor"))+"&body="+encodeURIComponent(m);
+});
+
+var views=["home","privacy","contact"];
+var titles={home:"Freelance Hourly Rate Calculator",privacy:"Privacy Policy | Freelance Hourly Rate Calculator",contact:"Contact | Freelance Hourly Rate Calculator"};
+function route(){
+var h=(location.hash||"").replace("#","");
+if(views.indexOf(h)<0)h="home";
+views.forEach(function(v){$("view-"+v).hidden=(v!==h)});
+var links=document.querySelectorAll("[data-nav]");
+for(var i=0;i<links.length;i++){links[i].classList.toggle("active",links[i].getAttribute("data-nav")===h)}
+document.title=titles[h];
+window.scrollTo(0,0);
+}
+window.addEventListener("hashchange",route);
+route();
+})();
+</script>
+</body>
+</html>
+
+
